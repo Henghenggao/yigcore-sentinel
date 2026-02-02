@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run build:*)",
+      "Bash(node:*)",
+      "Bash(npm install:*)",
+      "Bash(ls:*)",
+      "Read(//c/Users/gaoyu/Documents/GitHub/yigcore-sentinel/**)",
+      "Bash(git init:*)",
+      "Bash(git add:*)"
+    ]
+  }
+}

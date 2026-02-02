@@ -1,0 +1,54 @@
+# Node.js
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Build artifacts
+dist/
+*.tsbuildinfo
+
+# Tests
+**/*.test.ts
+**/__tests__/
+coverage/
+
+# Development
+.git/
+.github/
+.vscode/
+*.md
+!README.md
+
+# Environment files
+.env
+.env.*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Documentation (except README)
+docs/
+examples/
+CONTRIBUTING.md
+LICENSE
+
+# Python files (not needed for Node.js server)
+python/
+*.py
+*.pyc
+__pycache__/
+
+# Misc
+output.txt
+test_sentinel.py
+LAUNCH_MATERIALS.md

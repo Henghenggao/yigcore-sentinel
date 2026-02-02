@@ -1,0 +1,44 @@
+{
+  "defaultEffect": "allow",
+  "rules": [
+    {
+      "id": "block_system_files",
+      "action": "delete_file",
+      "effect": "deny",
+      "conditions": {
+        "pathPattern": "/etc/*"
+      },
+      "reason": "System files in /etc are protected"
+    },
+    {
+      "id": "block_sys_directory",
+      "action": "delete_file",
+      "effect": "deny",
+      "conditions": {
+        "pathPattern": "/sys/*"
+      },
+      "reason": "System files in /sys are protected"
+    },
+    {
+      "id": "warn_shell_execution",
+      "action": "execute_shell",
+      "effect": "warn",
+      "reason": "Shell command execution is logged for audit purposes"
+    },
+    {
+      "id": "warn_dangerous_shell_commands",
+      "action": "execute_shell",
+      "effect": "warn",
+      "reason": "Potentially dangerous shell command detected"
+    },
+    {
+      "id": "limit_expensive_llm_calls",
+      "action": "llm_call",
+      "effect": "allow",
+      "conditions": {
+        "maxCost": 0.1
+      },
+      "reason": "LLM calls above $0.10 are flagged for review"
+    }
+  ]
+}

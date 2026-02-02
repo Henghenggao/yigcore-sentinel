@@ -1,0 +1,124 @@
+version: '3.8'
+
+# ============================================================================
+# Yigcore Sentinel + OpenClaw - Production Deployment
+# ============================================================================
+#
+# This compose file demonstrates the recommended deployment pattern:
+# - Sentinel runs as a sidecar governance layer
+# - OpenClaw (or any AI agent) connects to Sentinel via HTTP
+#
+# Usage:
+#   docker compose up -d              # Start in background
+#   docker compose logs -f sentinel   # View logs
+#   docker compose down               # Stop and remove containers
+#
+# ============================================================================
+
+services:
+  # ==========================================================================
+  # Sentinel: Governance Sidecar
+  # ==========================================================================
+  sentinel:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: yigcore-sentinel
+    ports:
+      - "${SENTINEL_PORT:-11435}:11435"
+    environment:
+      # Server configuration
+      - PORT=11435
+      - HOST=0.0.0.0
+      - NODE_ENV=production
+
+      # Governance settings
+      - DEFAULT_BUDGET=${DEFAULT_BUDGET:-10.0}
+      - RATE_LIMIT_CAPACITY=${RATE_LIMIT_CAPACITY:-100}
+      - RATE_LIMIT_REFILL_RATE=${RATE_LIMIT_REFILL_RATE:-10}
+
+      # Logging
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+
+    volumes:
+      # Mount custom policy configuration
+      - ./policy.json:/app/policy.json:ro
+
+      # Optional: Mount custom policy from host
+      # - ./custom-policy.json:/app/policy.json:ro
+
+    restart: unless-stopped
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11435/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+    networks:
+      - sentinel-network
+
+    # Resource limits (optional)
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+
+  # ==========================================================================
+  # OpenClaw: AI Agent (Example)
+  # ==========================================================================
+  # Uncomment and customize this section for your OpenClaw deployment
+  #
+  # openclaw:
+  #   image: openclaw/openclaw:latest
+  #   container_name: openclaw-agent
+  #   depends_on:
+  #     sentinel:
+  #       condition: service_healthy
+  #   environment:
+  #     # Point OpenClaw to Sentinel
+  #     - SENTINEL_URL=http://sentinel:11435
+  #
+  #     # OpenClaw configuration
+  #     - OPENAI_API_KEY=${OPENAI_API_KEY}
+  #     - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+  #
+  #   volumes:
+  #     # Mount OpenClaw workspace
+  #     - ./workspace:/workspace
+  #
+  #   networks:
+  #     - sentinel-network
+  #
+  #   restart: unless-stopped
+
+  # ==========================================================================
+  # Example: Python AI Agent with Sentinel
+  # ==========================================================================
+  # python-agent:
+  #   build:
+  #     context: ./examples/openclaw_integration
+  #     dockerfile: Dockerfile.agent
+  #   depends_on:
+  #     sentinel:
+  #       condition: service_healthy
+  #   environment:
+  #     - SENTINEL_URL=http://sentinel:11435
+  #   networks:
+  #     - sentinel-network
+
+networks:
+  sentinel-network:
+    driver: bridge
+
+# ============================================================================
+# Volume definitions (if needed for data persistence)
+# ============================================================================
+# volumes:
+#   sentinel-data:
+#   openclaw-workspace:
