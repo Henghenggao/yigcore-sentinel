@@ -300,9 +300,13 @@ sudo systemctl start sentinel
 - [x] **v0.2.0** - Web dashboard for real-time monitoring ✨
 - [x] **v0.2.0** - Docker & docker-compose support ✨
 - [x] **v0.2.0** - CLI tool with daemon mode ✨
-- [ ] **Future** - Persistent storage, additional SDKs, and more
+- [x] **v0.3.0** - Persistence Layer (SQLite + File) ✨
+- [x] **v0.3.0** - Enterprise Preview Dashboard ✨
+- [ ] **v0.4.0** - JavaScript/TypeScript SDK (Planned Q1 2026)
+- [ ] **v0.5.0** - LLM-based Policy Engine (Planned Q2 2026)
+- [ ] **Future** - Multi-language SDKs, HA deployment, and more
 
-See [GitHub Issues](https://github.com/Henghenggao/yigcore-sentinel/issues) for planned features and community discussions.
+See [CHANGELOG.md](./CHANGELOG.md) for detailed version history and [GitHub Issues](https://github.com/Henghenggao/yigcore-sentinel/issues) for planned features.
 
 ---
 
