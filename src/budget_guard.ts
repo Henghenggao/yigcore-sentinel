@@ -26,11 +26,21 @@ export class BudgetGuard {
   }
 
   getUsage(userId: string): number {
-    return this.usage.get(userId) ?? 0;
+    return this.usage.get(userId) || 0.0;
+  }
+
+  getUsageMap(): Map<string, number> {
+    return this.usage;
+  }
+
+  restoreUsage(usageData: Record<string, number>) {
+    for (const [userId, amount] of Object.entries(usageData)) {
+      this.usage.set(userId, amount);
+    }
   }
 
   getLimit(userId: string): number {
-    return this.limits.get(userId) ?? this.defaultLimit;
+    return this.limits.get(userId) || this.defaultLimit;
   }
 
   getRemaining(userId: string): number {

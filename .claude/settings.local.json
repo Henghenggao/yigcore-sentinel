@@ -7,7 +7,20 @@
       "Bash(ls:*)",
       "Read(//c/Users/gaoyu/Documents/GitHub/yigcore-sentinel/**)",
       "Bash(git init:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git tag:*)",
+      "Bash(git branch:*)",
+      "Bash(git remote add:*)",
+      "Bash(git push:*)",
+      "Bash(npm test:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npx vite build)",
+      "Bash(gh auth status:*)",
+      "Bash(gh repo edit:*)",
+      "Bash(gh repo view:*)",
+      "Bash(gh release create:*)",
+      "Bash(gh release view:*)"
     ]
   }
 }

@@ -4,12 +4,12 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.4-blue)](https://www.typescriptlang.org/)
 [![Python](https://img.shields.io/badge/Python-3.9+-green)](https://www.python.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-20+-brightgreen)](https://nodejs.org/)
-[![Version](https://img.shields.io/badge/version-0.2.0-blue)](https://github.com/Henghenggao/yigcore-sentinel/releases)
+[![Version](https://img.shields.io/badge/version-0.3.0-blue)](https://github.com/Henghenggao/yigcore-sentinel/releases)
 [![Docker](https://img.shields.io/badge/docker-ready-blue)](https://github.com/Henghenggao/yigcore-sentinel/blob/main/Dockerfile)
 
 **Lightweight governance layer for AI agents** - Add budget control, audit logging, and policy enforcement to any AI agent in minutes.
 
-> 🎉 **v0.2.0 Released!** Now with Web Dashboard, Docker support, and production-ready deployment. [See what's new →](./RELEASE_NOTES_v0.2.0.md)
+> 🎉 **v0.3.0 Released!** Now with Persistence Layer (SQLite/File), Enterprise Preview Dashboard, and more. [See what's new →](./RELEASE_NOTES_v0.3.0.md)
 
 ---
 
@@ -37,7 +37,8 @@ npm run dev
 You should see:
 ```
 🚀 Yigcore Sentinel running on http://0.0.0.0:11435
-📋 Default budget: $10/user
+💰 Restored budget usage for 0 users
+⚡ Rate limit: Not initialized
 📜 Policy: 5 rules loaded
 📊 Dashboard available at /dashboard/
 ```
@@ -99,8 +100,13 @@ AI agents like [OpenClaw](https://github.com/openclaw/openclaw) and custom auton
 │  │ 2. Budget Guard   (Cost Tracking│   │
 │  │ 3. Policy Engine  (Rule-based)  │   │
 │  │ 4. Audit Logger   (Structured)  │   │
-│  └─────────────────────────────────┘   │
-└─────────────────────────────────────────┘
+│  └────────┬──────────────────┬─────┘   │
+└───────────┼──────────────────┼──────────┘
+            │                  │
+            ▼                  ▼
+    ┌───────────────┐  ┌───────────────┐
+    │  audit.db     │  │  budget.json  │
+    └───────────────┘  └───────────────┘
 ```
 
 **Sidecar benefits**:
@@ -113,16 +119,21 @@ AI agents like [OpenClaw](https://github.com/openclaw/openclaw) and custom auton
 
 ## ✨ Features
 
-### 🌐 Web Dashboard (NEW in v0.2.0)
+### 🌐 Web Dashboard (Updated v0.3.0)
 
 Real-time monitoring and management:
-- 📊 Live budget tracking with visual progress bars
-- 📝 Audit log stream (auto-refreshes every 5s)
-- 👥 Per-user statistics
-- 🔄 One-click budget reset
-- 📱 Responsive design
+- 📊 **Enterprise Preview**: Explore advanced capabilities like Bandit Router and DAG Analytics.
+- 📈 Live budget tracking with persistent history.
+- 📝 Persistent audit log stream (SQLite backed).
+- 👥 Per-user statistics.
+- 🔄 One-click budget reset.
 
 **Access:** `http://localhost:11435/dashboard/`
+
+### 🛡️ Persistence Layer (NEW in v0.3.0)
+- **Zero-Config SQLite**: Audit logs are automatically saved to `audit.db`.
+- **Budget Snapshot**: Usage data is persisted to `budget.json` (auto-save + graceful shutdown).
+- **Restart Safe**: Governance state survives server restarts.
 
 ### 1. Budget Guard
 Control spending on LLM API calls:

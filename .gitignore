@@ -57,3 +57,13 @@ Thumbs.db
 
 # Internal/sensitive documents
 LAUNCH_MATERIALS.md
+STRATEGIC_ALIGNMENT.md
+INTERNAL_ROADMAP.md
+docs/ALIGNMENT_SUMMARY.md
+
+# Persistence Data
+audit.db
+audit.db-journal
+budget.json
+test_budget.json
+test_audit.db

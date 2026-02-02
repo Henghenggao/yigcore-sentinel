@@ -236,7 +236,7 @@ Health check endpoint.
 {
   "status": "healthy",
   "uptime": 3600,
-  "version": "0.1.0"
+  "version": "0.3.0"
 }
 ```
 

@@ -1,6 +1,6 @@
 {
   "name": "yigcore-sentinel",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Lightweight governance layer for AI agents - budget control, audit logging, policy enforcement",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -44,15 +44,18 @@
     "url": "https://github.com/Henghenggao/yigcore-sentinel/issues"
   },
   "dependencies": {
-    "fastify": "^4.26.0",
     "@fastify/cors": "^9.0.1",
     "@fastify/static": "^7.0.0",
+    "@types/better-sqlite3": "^7.6.13",
+    "better-sqlite3": "^12.6.2",
+    "fastify": "^4.26.0",
     "zod": "^3.22.4"
   },
   "devDependencies": {
     "@types/node": "^20.11.30",
     "@typescript-eslint/eslint-plugin": "^7.1.0",
     "@typescript-eslint/parser": "^7.1.0",
+    "axios": "^1.13.4",
     "eslint": "^8.57.0",
     "tsx": "^4.7.1",
     "typescript": "^5.4.5",

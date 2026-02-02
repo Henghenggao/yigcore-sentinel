@@ -3,96 +3,122 @@
  * Logs governance decisions and events.
  */
 
-export interface AuditEvent {
+import { type AuditStore } from './storage/AuditStore';
+
+export interface AuditLogEntry {
   type: string;
   timestamp: number;
-  agentId?: string;
-  details?: Record<string, any>;
-}
-
-export interface InferenceAuditEntry {
-  type: 'inference';
-  timestamp: number;
-  roundId?: string;
-  taskId?: string;
-  agentId: string;
-  providerId: string;
-  model: string;
-  contextSize: number;
-  outputTokens: number;
-  costUsd: number;
-  durationMs: number;
-  status: 'success' | 'error';
-  error?: string;
-}
-
-export interface GovernanceAuditEntry {
-  type: 'governance_allow' | 'governance_block' | 'governance_warning';
-  timestamp: number;
-  agentId: string;
-  action: string;
+  agentId?: string; // Optional because system events might not have an agentId
+  action?: string;
   reason?: string;
   details?: Record<string, any>;
+  // Legacy fields to support migration or keep compatibility if needed
+  roundId?: string;
+  taskId?: string;
+  providerId?: string;
+  model?: string;
+  contextSize?: number;
+  outputTokens?: number;
+  costUsd?: number;
+  durationMs?: number;
 }
 
-export type StructuredAuditEntry = InferenceAuditEntry | GovernanceAuditEntry | AuditEvent;
+export type LogSink = (entry: AuditLogEntry) => void;
 
-export type AuditSink = (entry: StructuredAuditEntry) => void;
+interface AuditLoggerOptions {
+  sink?: LogSink;
+  retainInMemory?: boolean;
+  maxMemoryLogs?: number;
+  store?: AuditStore;
+}
 
 /**
  * Structured audit logger that outputs entries to a configurable sink.
  * Default sink writes JSON lines to stderr.
  */
 export class StructuredAuditLogger {
-  private readonly sink: AuditSink;
-  private readonly entries: StructuredAuditEntry[] = [];
-  private readonly retainInMemory: boolean;
+  private sink?: LogSink;
+  private memoryLogs: AuditLogEntry[] = [];
+  private retainInMemory: boolean;
+  private maxMemoryLogs: number;
+  private store?: AuditStore;
 
-  constructor(options?: { sink?: AuditSink; retainInMemory?: boolean }) {
-    this.sink = options?.sink ?? defaultSink;
-    this.retainInMemory = options?.retainInMemory ?? false;
+  constructor(options: AuditLoggerOptions = {}) {
+    this.sink = options.sink ?? defaultSink;
+    this.retainInMemory = options.retainInMemory ?? false;
+    this.maxMemoryLogs = options.maxMemoryLogs ?? 1000;
+    this.store = options.store;
   }
 
-  logEvent(event: AuditEvent): void {
-    this.emit(event);
+  log(entry: AuditLogEntry) {
+    // 1. Send to sink (e.g., console/file)
+    if (this.sink) {
+      try {
+        this.sink(entry);
+      } catch {
+        // best effort
+      }
+    }
+
+    // 2. Persist to store (if configured)
+    if (this.store) {
+      try {
+        this.store.log(entry);
+      } catch (err) {
+        console.error('Failed to log to audit store:', err);
+      }
+    }
+
+    // 3. Keep in memory (if configured)
+    if (this.retainInMemory) {
+      this.memoryLogs.unshift(entry);
+      if (this.memoryLogs.length > this.maxMemoryLogs) {
+        this.memoryLogs.pop();
+      }
+    }
   }
 
-  logInference(entry: InferenceAuditEntry): void {
-    this.emit(entry);
+  logEvent(event: AuditLogEntry): void {
+    this.log(event);
   }
 
-  logGovernance(entry: GovernanceAuditEntry): void {
-    this.emit(entry);
+  logInference(entry: AuditLogEntry): void {
+    this.log(entry);
   }
 
-  /** Get retained entries (only if retainInMemory was true). */
-  getEntries(): readonly StructuredAuditEntry[] {
-    return this.entries;
+  logGovernance(entry: AuditLogEntry): void {
+    this.log(entry);
   }
 
   /** Get recent entries (last N). */
-  getRecentEntries(limit: number = 100): readonly StructuredAuditEntry[] {
-    return this.entries.slice(-limit);
+  getRecentEntries(limit: number = 100): AuditLogEntry[] {
+    // If we have a store, prefer querying it
+    if (this.store) {
+      try {
+        const logs = this.store.query({ limit });
+        if (logs instanceof Promise) {
+          // Fallback to memory if store is async and we are in sync method
+          return this.memoryLogs.slice(0, limit);
+        }
+        return logs;
+      } catch (e) {
+        console.error('Failed to query audit store:', e);
+        return this.memoryLogs.slice(0, limit);
+      }
+    }
+    return this.memoryLogs.slice(0, limit);
   }
 
-  /** Clear retained entries. */
+  /**
+   * Clear memory logs provided we are retaining them.
+   * Does NOT clear persistent store.
+   */
   clear(): void {
-    this.entries.length = 0;
-  }
-
-  private emit(entry: StructuredAuditEntry): void {
-    if (this.retainInMemory) {
-      this.entries.push(entry);
-    }
-    try {
-      this.sink(entry);
-    } catch {
-      // best-effort — audit logging must not crash the system
-    }
+    this.memoryLogs = [];
   }
 }
 
-function defaultSink(entry: StructuredAuditEntry): void {
+function defaultSink(entry: AuditLogEntry): void {
   try {
     process.stderr.write(JSON.stringify(entry) + '\n');
   } catch {
@@ -104,10 +130,10 @@ function defaultSink(entry: StructuredAuditEntry): void {
  * A no-op audit logger for testing or when audit is disabled.
  */
 export const nullAuditLogger = {
-  logEvent: () => {},
-  logInference: () => {},
-  logGovernance: () => {},
-  getEntries: () => [] as const,
+  log: () => { },
+  logEvent: () => { },
+  logInference: () => { },
+  logGovernance: () => { },
   getRecentEntries: () => [] as const,
-  clear: () => {},
+  clear: () => { },
 };

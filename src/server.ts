@@ -17,6 +17,8 @@ import { PolicyEngine, createDefaultPolicy, type PolicyConfig } from './policy_l
 import { TokenBucket } from './rate_limiter';
 import { readFileSync, existsSync } from 'fs';
 import { join } from 'path';
+import { SQLiteAuditStore } from './storage/SQLiteAuditStore';
+import { BudgetPersistence } from './storage/BudgetPersistence';
 
 const server = fastify({
   logger: {
@@ -42,14 +44,35 @@ if (dashboardExists) {
   server.log.info(`📊 Dashboard available at /dashboard/`);
 }
 
+// Initialize persistence
+const budgetPersistence = new BudgetPersistence();
+const auditStore = new SQLiteAuditStore();
+
 // Initialize governance components
 const budgetGuard = new BudgetGuard(parseFloat(process.env.DEFAULT_BUDGET || '10.0'));
 
+// Load persisted budget
+const savedBudgets = budgetPersistence.load();
+budgetGuard.restoreUsage(savedBudgets);
+server.log.info(`💰 Restored budget usage for ${Object.keys(savedBudgets).length} users`);
+
+// Auto-save budget usage every 60s
+setInterval(() => {
+  budgetPersistence.save(Object.fromEntries(budgetGuard.getUsageMap()));
+}, 60000);
+
+// Close resources on shutdown
+const cleanup = () => {
+  budgetPersistence.save(Object.fromEntries(budgetGuard.getUsageMap()));
+  auditStore.close();
+};
+
 const auditLogger = new StructuredAuditLogger({
-  retainInMemory: true, // Keep logs in memory for /governance/audit endpoint
+  retainInMemory: true,
+  store: auditStore,
   sink: (entry) => {
-    // Log to both file and console
-    server.log.info({ audit: entry });
+    // Log to console as well
+    server.log.debug({ audit: entry });
   },
 });
 
@@ -325,7 +348,7 @@ server.get('/health', async () => {
   return {
     status: 'ok',
     timestamp: Date.now(),
-    version: '0.2.0',
+    version: '0.3.0',
     dashboardAvailable: dashboardExists,
   };
 });
@@ -338,7 +361,7 @@ server.get('/health', async () => {
 server.get('/', async () => {
   return {
     name: 'Yigcore Sentinel',
-    version: '0.2.0',
+    version: '0.3.0',
     description: 'Lightweight governance layer for AI agents',
     endpoints: {
       'POST /governance/check': 'Check if an action is allowed',
@@ -397,6 +420,10 @@ async function gracefulShutdown(signal: string) {
   try {
     // Stop accepting new connections
     await server.close();
+
+    // Flush data
+    cleanup();
+    server.log.info('💾 Data persisted successfully');
 
     // Flush audit logs (if needed)
     server.log.info('✅ Server closed successfully');

@@ -1,8 +1,8 @@
-# Yigcore Sentinel v0.2.0 Upgrade Summary
+# Yigcore Sentinel v0.3.0 Upgrade Summary
 
 ## 🎉 What Was Accomplished
 
-Congratulations! Yigcore Sentinel has been successfully upgraded from **v0.1.0 to v0.2.0** with production-ready deployment capabilities.
+Congratulations! Yigcore Sentinel has been successfully upgraded to **v0.3.0**, introducing persistence and enterprise features.
 
 ---
 
@@ -62,32 +62,29 @@ Congratulations! Yigcore Sentinel has been successfully upgraded from **v0.1.0 t
   - User stats retrieval
   - Budget management (set/reset)
 
-### Phase 3: Documentation & Release
+### Phase 3: Documentation & Release (v0.2.0)
 
 - [x] **Deployment Guide** ([DEPLOYMENT.md](DEPLOYMENT.md))
-  - 5 deployment methods (Docker Compose, Docker, npm, systemd, source)
-  - Production checklist (security, reliability, observability)
-  - Kubernetes manifests example
-  - Monitoring and troubleshooting guides
-
 - [x] **Release Notes** ([RELEASE_NOTES_v0.2.0.md](RELEASE_NOTES_v0.2.0.md))
-  - Comprehensive changelog
-  - Feature highlights
-  - Upgrade guide
-  - Roadmap to v0.3.0
+- [x] **README Updates**
+- [x] **Version Bumps** (v0.2.0)
 
-- [x] **README Updates** ([README.md](README.md))
-  - v0.2.0 announcement banner
-  - Quick start with Docker
-  - Dashboard feature highlight
-  - Updated roadmap with checkmarks
+### Phase 4: Persistence & Enterprise (v0.3.0)
 
-- [x] **Version Bumps**
-  - Node.js package: 0.1.0 → 0.2.0
-  - Python SDK: 0.1.0 → 0.2.0
-  - Dashboard package: 0.2.0
-  - CLI version: 0.2.0
-  - Server version: 0.2.0
+- [x] **Persistence Layer**
+  - SQLite integration (`better-sqlite3`) for audit logs
+  - File-based persistence for budget tracking (`budget.json`)
+  - Verification tests (`tests/verify_persistence.ts`)
+
+- [x] **Enterprise Preview**
+  - "Enterprise" tab in Dashboard
+  - Sales funnel integration
+  - Dashboard persistence integration
+
+- [x] **Architecture Hardening**
+  - Graceful shutdown with data flush
+  - Refactored `AuditLogger`
+  - Robust E2E testing
 
 ---
 
@@ -96,27 +93,15 @@ Congratulations! Yigcore Sentinel has been successfully upgraded from **v0.1.0 t
 ```
 yigcore-sentinel/
 ├── src/
-│   └── cli.ts                        # NEW: CLI tool
-├── dashboard/                         # NEW: Entire dashboard
-│   ├── src/
-│   │   ├── App.tsx                   # Main dashboard component
-│   │   ├── App.css                   # Styling
-│   │   ├── main.tsx                  # Entry point
-│   │   ├── api/sentinel.ts           # API client
-│   │   └── types/index.ts            # TypeScript types
-│   ├── package.json                  # Dashboard dependencies
-│   ├── vite.config.ts                # Vite configuration
-│   ├── tsconfig.json                 # TypeScript config
-│   ├── tsconfig.node.json            # Node TypeScript config
-│   ├── index.html                    # HTML entry
-│   └── .gitignore                    # Dashboard gitignore
-├── Dockerfile                         # NEW: Multi-stage production Dockerfile
-├── docker-compose.yml                 # NEW: Compose stack
-├── .dockerignore                      # NEW: Docker build optimization
-├── .env.example                       # NEW: Environment template
-├── DEPLOYMENT.md                      # NEW: Deployment guide
-├── RELEASE_NOTES_v0.2.0.md           # NEW: Release notes
-└── UPGRADE_SUMMARY.md                 # NEW: This file
+│   ├── storage/                      # NEW: Storage engine
+│   │   ├── AuditStore.ts
+│   │   ├── SQLiteAuditStore.ts
+│   │   └── BudgetPersistence.ts
+├── dashboard/
+│   ├── src/components/
+│   │   ├── EnterpriseTab.tsx         # NEW: Enterprise preview
+│   │   └── EnterpriseTab.css
+├── RELEASE_NOTES_v0.3.0.md           # NEW: v0.3.0 notes
 ```
 
 ---
