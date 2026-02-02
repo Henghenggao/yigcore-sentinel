@@ -8,7 +8,6 @@ function App() {
   const [health, setHealth] = useState<HealthStatus | null>(null);
   const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>([]);
   const [userStats, setUserStats] = useState<Map<string, UserStats>>(new Map());
-  const [selectedUser, setSelectedUser] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [autoRefresh, setAutoRefresh] = useState(true);
